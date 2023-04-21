@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, StyleSheet, View, TouchableOpacity,FlatList, TouchableHighlight } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity,FlatList, TouchableHighlight, ScrollView } from "react-native";
 import AppHeader from "../components/AppHeader";
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -10,17 +10,25 @@ import formatMoney from 'accounting-js/lib/formatMoney.js'
 import {BluetoothEscposPrinter, BluetoothManager, BluetoothTscPrinter} from "react-native-bluetooth-escpos-printer";
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import moment from 'moment'
+import { useFocusEffect } from '@react-navigation/native';
 import AlertwithChild from "../components/AlertwithChild";
+import SearchInput, { createFilter } from 'react-native-search-filter';
+
+const KEYS_TO_FILTERS = ['tr_id'];
 const TransactionSetailsScreen = ({navigation, route}) => {
 const { transactions, store_info } = route.params;
-const {getTRDetails,trdetails, onVoidSingleTransaction } = useStore();
+const {getTRDetails,trdetails, onVoidSingleTransaction, custom_trdetails } = useStore();
 const [reason, setReason] = useState('')
 const [alerts, alertVisible] = useState(false)
 const [pinVisible, setPinVisible] = useState(false)
 const [error, setError] = useState('')
+const [code, setCode] = useState('')
 const [items, setItem] = useState([])
-console.log('tr',trdetails)
 
+
+
+
+const filteredTRDetails = custom_trdetails.filter(createFilter(transactions._id, KEYS_TO_FILTERS))
 const onCancelAlert = () => {
   alertVisible(false)
 }
@@ -79,7 +87,7 @@ const printReceipt = async () => {
             heigthtimes: 0,
             fonttype: 1
           });
-        trdetails.map(async(item,index) => {
+          filteredTRDetails.map(async(item,index) => {
           await BluetoothEscposPrinter.printColumn(columnWidths,
             [BluetoothEscposPrinter.ALIGN.LEFT, BluetoothEscposPrinter.ALIGN.RIGHT],
             [`${item.name} - ${item.brand} ${item.quantity}x${formatMoney(item.sprice, { symbol: "₱", precision: 2 })}   `, `${formatMoney(item.quantity*item.sprice, { symbol: "₱", precision: 2 })}`], {
@@ -146,9 +154,7 @@ const printReceipt = async () => {
 }
 
 
-  useEffect(() => {
-    getTRDetails(transactions._id)
-  },[]);
+ 
 
   const renderItem = ({ item }) => (
     item.status == "Completed" &&
@@ -179,15 +185,18 @@ const printReceipt = async () => {
       </View>
       
         <Text style={{color: colors.statusBarCoverDark,textAlign:"center"}}>{formatMoney(item.quantity *( item.sprice + item.addon_price), { symbol: "₱", precision: 2 })}</Text>
-        <TouchableOpacity  onPress={()=> { alertVisible(true), setItem(item)}} style={{width: 50,backgroundColor: colors.red, justifyContent:'center', alignItems:'center', paddingHorizontal:5, borderRadius: 15, height: 30}}>
+     {  
+     filteredTRDetails.length === 1 && item.quantity === 1 ? null :
+     <TouchableOpacity  onPress={()=> { alertVisible(true), setItem(item)}} style={{width: 50,backgroundColor: colors.red, justifyContent:'center', alignItems:'center', paddingHorizontal:5, borderRadius: 15, height: 30}}>
               <Text style={{fontSize:10, color: colors.white}}>Void</Text>
             </TouchableOpacity>
+      }
     </View>
   )
 
   const calculateTotal = () => {
     let total = 0;
-    trdetails.forEach(list => {
+    filteredTRDetails.forEach(list => {
       if(list.status == "Completed"){
         total += list.quantity * (list.sprice + list.addon_price)
       }
@@ -198,11 +207,13 @@ const printReceipt = async () => {
 
 const onProceed = () => {
   onVoidSingleTransaction(items, reason)
+  setPinVisible(false)
+  alertVisible(false)
 }
 
   return (
       <View style={{flex:1}}>
-        <AlertwithChild visible={alerts} onCancel={onCancelAlert} onProceed={()=> onProceed()} title="Void Item?"  confirmTitle="PROCEED">
+        <AlertwithChild visible={alerts} onCancel={onCancelAlert} onProceed={()=> setPinVisible(true)} title="Void Item?"  confirmTitle="PROCEED">
           <View style={{flexDirection:'column',justifyContent:'space-evenly', marginVertical: 2, alignItems:'center'}}>
               <Text>Please select reason: </Text>
               <View style={{flexDirection:'row', marginTop: 10}}>
@@ -219,6 +230,28 @@ const onProceed = () => {
              
             </View>
           </AlertwithChild>
+          <AlertwithChild visible={pinVisible} onCancel={()=> setPinVisible(false)} onProceed={()=> onProceed()} title="Enter your code"  confirmTitle="PROCEED">
+          <View style={{flexDirection:'column',justifyContent:'space-evenly', marginVertical: 2, alignItems:'center'}}>
+              
+            <View style={{padding: 20}}>
+            <SmoothPinCodeInput password mask="﹡"
+              cellStyle={{
+                borderWidth: 1,
+                borderColor: 'gray',
+                borderRadius: 15
+              }}
+              cellSize={35}
+            codeLength={6}
+            value={code}
+            onTextChange={code => setCode(code)}/>
+        
+                    {
+                error.length !== 0?
+                <Text style={{textAlign:'center', color: colors.red}}>{error}</Text> : null
+            }
+            </View>
+            </View>
+          </AlertwithChild>
           <AppHeader 
             centerText="Transaction Details"
             leftComponent={
@@ -228,7 +261,8 @@ const onProceed = () => {
             } 
            
           />
-          <Card containerStyle={{padding: 0}} >
+
+          <ScrollView style={{padding: 15, backgroundColor: colors.white}} >
             <View style={{flexDirection:'row', justifyContent:'space-between', padding: 15}}>
               <View>
                 <Text style={{fontWeight:'500'}}>Customer : {transactions.customer_name ? transactions.customer_name : "None"}</Text>
@@ -258,7 +292,7 @@ const onProceed = () => {
             </ListItem>
             <FlatList
                 keyExtractor={(key) => key.name}
-                data={trdetails}
+                data={filteredTRDetails}
                 renderItem={renderItem}
                 />
                 <ListItem>
@@ -306,7 +340,7 @@ const onProceed = () => {
                   </View>
                   <View>
                     {
-                      trdetails.map(item => 
+                      filteredTRDetails.map(item => 
                         item.status == "Voided" &&
                         <View style={{flexDirection:"row", justifyContent:"space-between", marginVertical: 10}}>
                         <Text style={{textAlign:'left', flex: 2}}>x{item.quantity}  {item.name}</Text>
@@ -317,34 +351,8 @@ const onProceed = () => {
                     }
                   </View>
                 </View>
-            </Card>
-            {/* <Overlay  overlayStyle={{borderRadius: 25, margin: 30, width: '75%'}} isVisible={pinVisible} onBackdropPress={setPinVisible}>
-            <Text style={{textAlign:'center', fontSize: 18, fontWeight:'bold', marginVertical: 10}}>Enter store PIN</Text>
-            <View style={{padding: 20}}>
-            <SmoothPinCodeInput password mask="﹡"
-              cellStyle={{
-                borderWidth: 1,
-                borderColor: 'gray',
-                borderRadius: 15
-              }}
-              cellSize={35}
-            codeLength={6}
-            value={code}
-            onTextChange={code => setCode(code)}/>
-               <TouchableHighlight
-                    style={{ ...styles.openButton, backgroundColor: colors.primary, marginVertical: 20 }}
-
-                    onPress={()=> checkPIN()}
-                    >
-                    <Text style={styles.textStyle}>Proceed </Text>
-                    </TouchableHighlight>
-                    {
-                error.length !== 0?
-                <Text style={{textAlign:'center', color: colors.red}}>{error}</Text> : null
-            }
-            </View>
-            
-        </Overlay> */}
+            </ScrollView>
+           
       </View>
   );
 };

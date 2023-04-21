@@ -1395,7 +1395,6 @@ class TransferLogs {
     primaryKey: "_id",
   };
 }
-
 class Payment_Logs {
   /**
    *
@@ -1824,7 +1823,11 @@ class Archive {
     quantity,
     id,
     timeStamp,
-    archive_id
+    archive_id,
+    addon,
+    addon_price,
+    addon_cost,
+    option
   }) {
     this._partition = partition;
     this._id = id;
@@ -1839,6 +1842,10 @@ class Archive {
     this.quantity = quantity;
     this.timeStamp = timeStamp;
     this.archive_id = archive_id;
+    this.addon = addon,
+    this.addon_price = addon_price,
+    this.addon_cost = addon_cost,
+    this.option = option
   }
 
   
@@ -1857,7 +1864,12 @@ class Archive {
       store: "string?",
       quantity: "float?",
       timeStamp: "int",
-      archive_id: "string"
+      archive_id: "string",
+      addon: "string?",
+      addon_price: "float?",
+      addon_cost: "float?",
+      option: "string?",
+      
     },
     primaryKey: "_id",
   };

@@ -270,7 +270,7 @@ const onCancelCustomDisc = () => {
                 <TouchableOpacity onPress={()=> toggleSearch(!search)}>
                   <EvilIcons name={'search'} size={35} color={colors.white}/>
                 </TouchableOpacity>
-                <TouchableOpacity style={{flexDirection:'row'}} onPress={()=> navigation.navigate('Archive')}>
+                {/* <TouchableOpacity style={{flexDirection:'row'}} onPress={()=> navigation.navigate('Archive')}>
                  { archiveInfo.length != 0 ? 
                  <Avatar
                        size={20}
@@ -283,7 +283,7 @@ const onCancelCustomDisc = () => {
                     /> : null
                     }
                   <EvilIcons name={'archive'} size={35} color={colors.white}/>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
           } 
         />

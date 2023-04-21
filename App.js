@@ -69,7 +69,8 @@ function DrawerScreen({store_info}) {
       initialParams={{store_info: store_info}} 
         component={HomeScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Checkout" component={CheckoutScreen} />
-    <Drawer.Screen initialParams={{store_info: store_info}}  name="Archive" component={Archives} />
+    <Drawer.Screen initialParams={{store_info: store_info}}  name="Archive" component={ArchiveScreen} />
+    <Drawer.Screen initialParams={{store_info: store_info}}  name="ArchiveInfo" component={ArchiveDetailsScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Expenses" component={ExpensesScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Settings" component={Settings} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Customer" component={CustomersAndCreditScreen} />
@@ -77,7 +78,7 @@ function DrawerScreen({store_info}) {
     <Drawer.Screen initialParams={{store_info: store_info}}  name="TransactionDetailsScreen" component={TransactionSetailsScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="ZReadReport" component={ZReadReport} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Attendance" component={AttendanceScreen} />
-    <Drawer.Screen initialParams={{store_info: store_info}}  name="Credits" component={Credits} />
+    <Drawer.Screen initialParams={{store_info: store_info}}  name="Credits" component={CreditTransaction} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="CreditTransactionDetailsScreen" component={CreditTransactionSetailsScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Return" component={ReturnScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="DeliveryRequest" component={DeliveryRequest} />

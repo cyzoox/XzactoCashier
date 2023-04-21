@@ -40,9 +40,12 @@ const DeliveryRequestDetails = ({navigation, route}) => {
     const [pinVisible, setPinVisible] = useState(false)
     const [error, setError] = useState('')
     const [code, setCode] = useState('')
+    const [singlePinVisible, setSinglePinVisible] = useState(false)
+    const [returnAllPinVisible, setReturnAllPinVisible] = useState(false)
     const {  delivery_request,
         delivery_req_details,
-      
+      stores,
+      staffs,
         createDeliveryReport, 
         createStoreDeliverySummary,
         onSendProducts,
@@ -55,7 +58,20 @@ const DeliveryRequestDetails = ({navigation, route}) => {
 
        const filteredReturnDetails = filteredDetails.filter(createFilter("Returned", KEYS_TO_FILTERS1))
     
+
+
+      const staffID = () => {
+        let ss = []
+        staffs.forEach(item => {
+          if(item._id === store.attendant_id){
+           ss = ss.concat(item)
+          }
+        });
+        return ss;
+      }   
+ 
     const onAcceptRequest = () => {
+      if(staffID()[0] === code){
         filteredDetails.forEach(items => {
           if(items.status === "Pending"){
             let wproducts = {
@@ -79,22 +95,19 @@ const DeliveryRequestDetails = ({navigation, route}) => {
             }
 
          onSendProducts(wproducts, items);
+         setError('')
           }
   
         });
         saveToDeliveryReports()
+      }else{
+        setError("Wrong password, please try again!")
+      }
+      
     }
     
 
-    const onReturnDelivery = () => {
-      // if(errorText.length === 0){
-      //   setErrorText('Please fill in return reason.')
-      //   return;
-      // }
-      ReturnDelivery(request, reason)
-      setOverlayVisible(false)
-      navigation.goBack()
-    }
+ 
 
     const saveToDeliveryReports = () => {
         let dates = moment().unix()
@@ -200,16 +213,45 @@ const DeliveryRequestDetails = ({navigation, route}) => {
       }else{
         setErrorText2('')
       }
-      ReturnSingleItem(item, reason1, qty, request)
-      navigation.goBack()
-     
+        setSinglePinVisible(true)
       }
+
+    
       
+    const onReturnSingleCodeMatch = () => {
+      if(staffID()[0].password === code){
+        ReturnSingleItem(item, reason1, qty, request, staffID()[0])
+        setCode('')
+        setSinglePinVisible(false)
+        setVisible3(false)
+        setErrorText1('')
+        setErrorText2('')
+        navigation.goBack()
+      }else{
+        setError('Wrong password, please try again!')
+      }
+  
+
+    }
+
+    const onReturnAllCodeMatch = () => {
+      if(staffID()[0].password === code){
+        ReturnDelivery(request, reason, staffID()[0])
+        setOverlayVisible(false)
+        setCode('')
+        setError('')
+        navigation.goBack()
+      }else{
+        setError('Wrong password, please try again!')
+      }
+  
+
+    }
 
     const renderItem = ({ item }) => 
       {
       return(
-        item.status == "Pending" &&
+        item.status == "Pending" && item.stock !== 0 ?
         <View style={{flex:1,flexDirection:'row', justifyContent:'space-between', marginHorizontal: 20, marginVertical: 3, height: 40,alignItems:"center"}}>
         <View style={{flexDirection:'column',flex: 2}}>
         <Text>{item.pr_name} </Text>
@@ -217,9 +259,12 @@ const DeliveryRequestDetails = ({navigation, route}) => {
         </View>
        
         <Text style={{flex: 1,fontWeight:'bold', justifyContent:'center', alignItems:'center'}}>{formatMoney(item.stock*item.pr_sprice, { symbol: "₱", precision: 1 })}</Text>
-        <TouchableOpacity onPress={()=> {setItem(item), setVisible3(true)}}  style={{backgroundColor: colors.red, justifyContent:'center', alignItems:'center', paddingHorizontal:5, borderRadius: 15, height: 30}}>
+      {  
+      filteredDetails.length === 1 && item.stock === 1 ? null :
+      <TouchableOpacity onPress={()=> {setItem(item), setVisible3(true)}}  style={{backgroundColor: colors.red, justifyContent:'center', alignItems:'center', paddingHorizontal:5, borderRadius: 15, height: 30}}>
           <Text style={{fontSize:10, color: colors.white, paddingHorizontal: 10}}>Return</Text>
         </TouchableOpacity>
+        }
         {/* <ModalInputForm1
          displayComponent={
              <>
@@ -234,7 +279,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
          
         
        </ModalInputForm1> */}
-    </View>
+    </View>: null
       )
     }
         
@@ -466,17 +511,12 @@ const DeliveryRequestDetails = ({navigation, route}) => {
             <TouchableOpacity onPress={()=> setPinVisible(true)} style={styles.btn}>
                 <Text style={{textAlign:"center", fontSize: 18,color: colors.white, fontWeight:'bold'}}>Accept</Text>
             </TouchableOpacity>
-            <ModalInputForm
-             displayComponent={
-                 <>
-             <TouchableOpacity onPress={()=> setOverlayVisible(true)} style={[styles.btn, {backgroundColor: colors.red, width:'93%'}]}>
+            <TouchableOpacity onPress={()=> setVisible(true)} style={[styles.btn, {backgroundColor: colors.red, width:'93%'}]}>
                 <Text style={{textAlign:"center", fontSize: 18,color: colors.white, fontWeight:'bold'}}>Return</Text>
             </TouchableOpacity>
-                 </>
-             }
-             overlays ={overlayVisible}
-             title="Return Product" 
-          >
+            <Overlay
+            overlayStyle={{width: '70%', borderRadius: 10}} isVisible={visible2} onBackdropPress={setVisible}
+        >
               <Text style={{textAlign:'center'}}>
                 Are you sure you want to return this delivery request?
               </Text>
@@ -497,17 +537,17 @@ const DeliveryRequestDetails = ({navigation, route}) => {
                 <Button buttonStyle={{backgroundColor: colors.red}} title="Cancel" onPress={()=> setOverlayVisible(false)}/>
             </View>
             <View  style={{flex: 1, marginHorizontal: 15}} >
-             <Button buttonStyle={{backgroundColor: colors.green}}  title="Save" onPress={()=>  reason.length !== 0 ?  onReturnDelivery() : setErrorText('Please fill in return reason.')}/>
+             <Button buttonStyle={{backgroundColor: colors.green}}  title="Save" onPress={()=>  reason.length !== 0 ?  setReturnAllPinVisible(true) : setErrorText('Please fill in return reason.')}/>
             </View>
         </View>
               </View>
             
-           </ModalInputForm>
+           </Overlay>
            
         </ScrollView>
         </View>
         <Overlay  overlayStyle={{borderRadius: 25, margin: 30, width: '75%'}} isVisible={pinVisible} onBackdropPress={setPinVisible}>
-            <Text style={{textAlign:'center', fontSize: 18, fontWeight:'bold', marginVertical: 10}}>Enter store PIN</Text>
+            <Text style={{textAlign:'center', fontSize: 18, fontWeight:'bold', marginVertical: 10}}>Enter your PIN</Text>
             <View style={{padding: 20}}>
             <SmoothPinCodeInput password mask="﹡"
               cellStyle={{
@@ -534,6 +574,61 @@ const DeliveryRequestDetails = ({navigation, route}) => {
             
         </Overlay>
         
+        <Overlay  overlayStyle={{borderRadius: 25, margin: 30, width: '75%'}} isVisible={singlePinVisible} onBackdropPress={setSinglePinVisible}>
+            <Text style={{textAlign:'center', fontSize: 18, fontWeight:'bold', marginVertical: 10}}>Enter your PIN</Text>
+            <View style={{padding: 20}}>
+            <SmoothPinCodeInput password mask="﹡"
+              cellStyle={{
+                borderWidth: 1,
+                borderColor: 'gray',
+                borderRadius: 15
+              }}
+              cellSize={35}
+            codeLength={6}
+            value={code}
+            onTextChange={code => setCode(code)}/>
+               <TouchableHighlight
+                    style={{ ...styles.openButton, backgroundColor: colors.primary, marginVertical: 20 }}
+
+                    onPress={()=> onReturnSingleCodeMatch()}
+                    >
+                    <Text style={styles.textStyle}>Proceed </Text>
+                    </TouchableHighlight>
+                    {
+                error.length !== 0?
+                <Text style={{textAlign:'center', color: colors.red}}>{error}</Text> : null
+            }
+            </View>
+            
+        </Overlay>
+  
+        <Overlay  overlayStyle={{borderRadius: 25, margin: 30, width: '75%'}} isVisible={returnAllPinVisible} onBackdropPress={setReturnAllPinVisible}>
+            <Text style={{textAlign:'center', fontSize: 18, fontWeight:'bold', marginVertical: 10}}>Enter your PIN</Text>
+            <View style={{padding: 20}}>
+            <SmoothPinCodeInput password mask="﹡"
+              cellStyle={{
+                borderWidth: 1,
+                borderColor: 'gray',
+                borderRadius: 15
+              }}
+              cellSize={35}
+            codeLength={6}
+            value={code}
+            onTextChange={code => setCode(code)}/>
+               <TouchableHighlight
+                    style={{ ...styles.openButton, backgroundColor: colors.primary, marginVertical: 20 }}
+
+                    onPress={()=> onReturnAllCodeMatch()}
+                    >
+                    <Text style={styles.textStyle}>Proceed </Text>
+                    </TouchableHighlight>
+                    {
+                error.length !== 0?
+                <Text style={{textAlign:'center', color: colors.red}}>{error}</Text> : null
+            }
+            </View>
+            
+        </Overlay>
 
        <Overlay overlayStyle={{width: '70%', borderRadius: 10}} isVisible={visible3} onBackdropPress={setVisible3}>
        <Text style={{textAlign:'center', fontSize:18, marginBottom: 10}}>
@@ -570,7 +665,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
             <Button buttonStyle={{backgroundColor: colors.red}} title="Cancel" onPress={()=> setVisible3(false)}/>
         </View>
         <View  style={{flex: 1, marginHorizontal: 15}} >
-         <Button buttonStyle={{backgroundColor: colors.primary}}  title="Save" onPress={()=> onReturnSingleItem()}/>
+         <Button buttonStyle={{backgroundColor: colors.primary}}  title="Save" onPress={()=> onReturnSingleItem(true)}/>
         </View>
     </View>
           </View>
@@ -594,7 +689,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.89,
     shadowRadius: 2,
     elevation: 2,
-  }
+  },
+  reasonBTn: {padding: 6, borderColor: colors.black, borderWidth:1,backgroundColor:colors.white, borderRadius: 15, marginVertical: 10, marginHorizontal: 2 },
+  selectedBtn: {padding: 6, borderColor: colors.primary, borderWidth:1,backgroundColor:colors.primary, borderRadius: 15, marginVertical: 10, marginHorizontal: 2 },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 8,
+    elevation: 2
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
 });
 
 export default DeliveryRequestDetails;

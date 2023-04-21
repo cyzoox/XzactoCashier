@@ -378,7 +378,11 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
           quantity: item.quantity,
           id: item._id,
           timeStamp: item.timeStamp,
-          archive_id: ids
+          archive_id: ids,
+          addon: item.addon,
+          addon_price: item.addon_price,
+          addon_cost: item.addon_cost,
+          option: item.option
         }
         projectPOS.write(() => {
           projectPOS.create(
@@ -517,7 +521,7 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
     }); 
   };
 
-  const ReturnSingleItem = (items, reason, qty, req) => {
+  const ReturnSingleItem = (items, reason, qty, req, staff) => {
     const projectPOS = realmRef.current;
     const request = projectPOS.objects("DeliveryRequest"); 
     const request2 = projectPOS.objects("DeliveryRequestDetails"); 
@@ -526,7 +530,7 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
     const filteredRequest2 = request2.filtered("_id == $0", items._id);
    
    
-    
+
  
     let req_details = {
       partition: `project=${user.id}`,
@@ -549,7 +553,7 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
       withOptions: false,
       sku:'',
       return_reason: reason,
-      processed_by: "Admin"
+      processed_by: staff.attendant
     }
     projectPOS.write(() => {
       filteredRequest[0].total -= items.pr_sprice * parseFloat(qty)
@@ -565,15 +569,15 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
   };
 
 
-  const ReturnDelivery = ( req, reason ) => {
-    
+  const ReturnDelivery = ( req, reason, staff ) => {
+    console.log('staff', staff)
     const projectPOS = realmRef.current;
     projectPOS.write(() => {
      
       const request = projectPOS.objects("DeliveryRequest"); 
       const filteredRequest = request.filtered("_id == $0", req._id);
 
-        filteredRequest[0].processed_by = "Admin"
+        filteredRequest[0].processed_by = staff.attendant
         filteredRequest[0].return_reason = reason
         filteredRequest[0].status = "Returned"
       
@@ -626,10 +630,10 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
     saveList(lists, transaction.id, transaction.attendant_id,transaction.attendant_name)
   };
 
-  const reListArchive = ( lists ) => {
+  const reListArchive = ( archive,user ,store_info ) => {
     const projectPOS = realmRef.current;
     
-    lists?.forEach(item => {
+    archive?.forEach(item => {
     
       let list = {
 
@@ -644,13 +648,15 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
         store: item.store,
         quantity: item.quantity,
         _id: item._id,
-        timeStamp: item.timeStamp
-
+        timeStamp: item.timeStamp,
+        addon_price: item.addon_price,
+        addon_cost: item.addon_cost,
+        option: item.option
       }
-      onSaveList()
+      onSaveList(list,user, store_info )
     }); 
 
-    ondeleteArchive();
+    updateArchiveOnClear(store_info);
   };
 
   const saveList = ( lists,trid, name, id ) => {
@@ -806,7 +812,8 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
   setProductss([])
   };
 
-  const ondeleteArchive = () => {
+
+  const updateArchiveOnClear = (store_info) => {
     const projectPOS = realmRef.current;
     projectPOS.write(() => {
       const list = projectPOS.objects("Archive");
@@ -822,18 +829,6 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
   const newData1 = [...projectPOS.objects("Archive")];
   setArchiveInfo(newData)
   setArchive(newData1)
-  };
-
-  const updateArchiveOnClear = (list) => {
-    const projectPOS = realmRef.current;
-    list.forEach((item) => {
-    projectPOS.write(() => {
-      const products = projectPOS.objects("Products");
-      const filteredProducts = products.filtered("_id == $0", item._id);
-      filteredProducts[0].stock += item.quantity;
-      });
-    });
-    ondeleteArchive()
   }
 
   const updateProductOnClear = (list) => {
@@ -981,7 +976,7 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
       store_id: store_info._id,
       store: items.store,
       quantity: items.quantity,
-      uid: items.uid,
+      uid: items._id,
       timeStamp: moment().unix(),
       addon: items.addon,
       addon_price: items.addon_price,
@@ -1226,7 +1221,10 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
              delivery_req_details,
              ReturnDelivery,
              ReturnSingleItem,
-             onSendProducts
+             onSendProducts,
+             createDeliveryReport,
+             createStoreDeliverySummary,
+             createtransferLogs 
           }}
         >
             {children}

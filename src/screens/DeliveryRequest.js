@@ -21,7 +21,7 @@ const DeliveryRequest = ({navigation, route}) => {
     <TouchableOpacity style={styles.listStyle} onPress={()=> navigation.navigate('DeliveryRequestDetails', {request : item, store:store_info})}>
       <View style={{flexDirection: 'row'}}>
         <View style={{paddingRight: 10}}>
-          <Avatar containerStyle={styles.avatarStyle} size={45} source={require('../../assets/bluetooth.png')}/>
+          <Avatar containerStyle={styles.avatarStyle} size={45} source={require('../../assets/xzacto_icons/warehouseicons/logs.png')}/>
         </View>
         <View>
           <Text style={{color: colors.coverDark, marginBottom: 3, fontWeight:'700', fontSize: 15}}>

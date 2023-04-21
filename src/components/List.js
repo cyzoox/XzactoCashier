@@ -169,9 +169,9 @@ export default function List({ navigation, clearAll, archive, screen, toggleScan
             <TouchableOpacity onPress={()=> toggleScanner(true)} style={{backgroundColor:colors.white, justifyContent:'center', padding: 3, borderRadius: 10, marginLeft: 10, borderRadius: 10, borderColor: colors.accent, borderWidth: 1}}>
               <MaterialCommunityIcons name={'barcode-scan'} size={15} color={colors.statusBarCoverDark} style={{padding: 5}}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={()=> archive(true)} style={{backgroundColor:colors.white, justifyContent:'center', padding: 3, borderRadius: 10, marginLeft: 10,borderRadius: 10, borderColor: colors.accent, borderWidth: 1}}>
+            {/* <TouchableOpacity onPress={()=> archive(true)} style={{backgroundColor:colors.white, justifyContent:'center', padding: 3, borderRadius: 10, marginLeft: 10,borderRadius: 10, borderColor: colors.accent, borderWidth: 1}}>
               <Feather name={'archive'} size={15} color={colors.statusBarCoverDark} style={{padding: 5}}/>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
            
         </View> : <View style={{flexDirection:'row'}}>
              

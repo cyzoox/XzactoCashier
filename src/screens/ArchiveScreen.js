@@ -10,7 +10,7 @@ import formatMoney from 'accounting-js/lib/formatMoney.js'
 import Alert from "../components/Alert";
 import { useAuth } from "../context/AuthContext";
 
-const ArchiveScreen = ({navigation}) => {
+const ArchiveScreen = ({navigation, route}) => {
   const store_info = route.params.store_info;
   const { user } = useAuth();
     const {archive ,archiveInfo, updateArchiveOnClear, reListArchive} = useStore();
@@ -45,14 +45,14 @@ const ArchiveScreen = ({navigation}) => {
       }
 
       const onProceedDelete = () => {
-        updateArchiveOnClear(archive);
+        updateArchiveOnClear( store_info);
         setDelete(false);
         navigation.goBack();
  
       }
 
       const onProceedRelist = () => {
-        reListArchive(archive, user, store_info )
+        reListArchive(archive,user, store_info )
         setRelist(false)
       }
 
