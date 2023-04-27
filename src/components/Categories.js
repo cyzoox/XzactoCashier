@@ -23,7 +23,7 @@ export function Categories({onTabChange, store_info}) {
     category } = useStore();
   const [active, setActive] = useState(category.length === 0 ?  '': category[0].name);
 
-  console.log('categ', category)
+
 
   useEffect(() => {
     category.length === 0 ?

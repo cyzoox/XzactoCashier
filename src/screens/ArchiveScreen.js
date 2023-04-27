@@ -56,6 +56,7 @@ const ArchiveScreen = ({navigation, route}) => {
         setRelist(false)
       }
 
+      
   return (
       <View>
         <Alert visible={ondelete} onCancel={onCancelDelete} onProceed={onProceedDelete} title="Delete this archive?" content="Are you sure you want to delete this archive?" confirmTitle="Proceed"/>

@@ -71,7 +71,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
       }   
  
     const onAcceptRequest = () => {
-      if(staffID()[0] === code){
+      if(staffID()[0].password === code){
         filteredDetails.forEach(items => {
           if(items.status === "Pending"){
             let wproducts = {
@@ -100,6 +100,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
   
         });
         saveToDeliveryReports()
+        setPinVisible(false)
       }else{
         setError("Wrong password, please try again!")
       }
@@ -192,7 +193,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
       const calculateTotal = () => {
         let total = 0;
         filteredDetails.forEach(list => {
-          if(list .status === "Pending"){
+          if(list.status === "Pending"){
             total += list.stock * list.pr_sprice
           }
                

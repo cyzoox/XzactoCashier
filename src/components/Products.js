@@ -68,7 +68,7 @@ export default function Products({ navigation, search,toggleSearch, store_info})
     const onCancelAlert = () => {
       alertVisible(false)
     }
-    console.log(products)
+   
 
     const onSaveList2 = () => {
     
@@ -126,7 +126,7 @@ export default function Products({ navigation, search,toggleSearch, store_info})
    
 
     const onSaveLists = (item) => {
-      console.log(item)
+
       let list = {
         _partition: `project=${user.id}`,
         _id: item._id,
@@ -150,7 +150,7 @@ export default function Products({ navigation, search,toggleSearch, store_info})
       onSaveList(list, user, store_info)
     }
     const onSaveWithAddon = () => {
-      console.log('bhdjj')
+    
       let list = {
         _partition: `project=${user.id}`,
         _id: product_info._id,

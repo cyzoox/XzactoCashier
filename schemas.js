@@ -1876,7 +1876,6 @@ class Archive {
 }
 
 
-
 class Credit_Logs {
   /**
    *
@@ -2323,7 +2322,6 @@ export {
          DeliveryReport,
          DeliveryReportSummary,
          TransferLogs,
-         DeliveryStoreSummary,
          Expired,
          Pullout,
          BO,
@@ -2343,5 +2341,5 @@ export {
          Credit_Logs,
          DeliveryRequest,
          DeliveryRequestDetails,
-         
+         DeliveryStoreSummary
         };

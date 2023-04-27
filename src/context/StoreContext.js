@@ -1,6 +1,6 @@
 import { Item } from 'native-base';
 import React, { useContext, useRef, useState, useEffect  } from 'react';
-import { Categories, Customers, Expenses, Product, Staffs, List, Transactions, TR_Details, Archive, ArchiveInfo, AttendanceLogs, Credit_Logs, Credit_List, BO, Returned, Discount, Products, Settings, Inventory, Addon, Option, Stores, DeliveryRequest, DeliveryRequestDetails, WarehouseProducts, DeliveryReport, DeliveryReportSummary, DeliveryReportWarehouse, TransferLogs } from '../../schemas';
+import { Categories, Customers, Expenses, Product, Staffs, List, Transactions, TR_Details, Archive, ArchiveInfo, AttendanceLogs, Credit_Logs, Credit_List, BO, Returned, Discount, Products, Settings, Inventory, Addon, Option, Stores, DeliveryRequest, DeliveryRequestDetails, WarehouseProducts, DeliveryReport, DeliveryReportSummary, DeliveryReportWarehouse, TransferLogs, DeliveryStoreSummary } from '../../schemas';
 import { useAuth } from './AuthContext';
 import uuid from 'react-native-uuid';
 import moment from 'moment';
@@ -73,6 +73,7 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
         WarehouseProducts.schema,
         DeliveryReport.schema,
         DeliveryReportSummary.schema,
+        DeliveryStoreSummary.schema,
         DeliveryReportWarehouse.schema,
         TransferLogs.schema
 
@@ -630,10 +631,9 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
     saveList(lists, transaction.id, transaction.attendant_id,transaction.attendant_name)
   };
 
-  const reListArchive = ( archive,user ,store_info ) => {
-    const projectPOS = realmRef.current;
-    
-    archive?.forEach(item => {
+  const reListArchive = ( archives,user ,store_info ) => {
+
+    archives.forEach(item => {
     
       let list = {
 
@@ -653,10 +653,10 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
         addon_cost: item.addon_cost,
         option: item.option
       }
-      onSaveList(list,user, store_info )
+      setProductss([...products_list, list])
     }); 
 
-    updateArchiveOnClear(store_info);
+   
   };
 
   const saveList = ( lists,trid, name, id ) => {
