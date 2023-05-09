@@ -16,7 +16,7 @@ import FastImage from 'react-native-fast-image'
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const KEYS_TO_FILTERSs = ['store_id'];
-const KEYS_TO_FILTERS = ['category'];
+const KEYS_TO_FILTERS = ['name', 'category'];
 import BigList from "react-native-big-list";
 
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
@@ -266,7 +266,7 @@ const onselectOption =(item) => {
           }
  
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, marginBottom: 80}}>
       <Alert visible={alerts} onCancel={onCancelAlert} onProceed={onCancelAlert} title="No Logged In Attendant" content="Please logged in first before you proceed." confirmTitle="OK"/>
     
        <Alert visible={alerts2} onCancel={onCancel} onProceed={onCancel} title="Invalid Input" content="Input must be a number." confirmTitle="OK"/>

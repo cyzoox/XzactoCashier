@@ -69,9 +69,40 @@ const DeliveryRequestDetails = ({navigation, route}) => {
         });
         return ss;
       }   
- 
+      
+      const calculateTotal = () => {
+        let total = 0;
+        filteredDetails.forEach(list => {
+          if(list.status === "Pending"){
+            total += list.stock * list.pr_sprice
+          }
+               
+        });
+       return total;
+    }
+
+
     const onAcceptRequest = () => {
+      let dates = moment().unix()
       if(staffID()[0].password === code){
+        let drs = {
+          partition: `project=${user.id}`,
+          id: uuid.v4(),
+          timeStamp: moment().unix(),
+          year :moment.unix(dates).format('YYYY'),
+          year_month :moment.unix(dates).format('MMMM-YYYY'),
+          year_week :moment.unix(dates).format('WW-YYYY'),
+          date: moment.unix(dates).format('MMMM DD, YYYY'),
+          supplier: 'Warehouse',
+          supplier_id: 'Warehouse',
+          delivered_by: 'C/o Warehouse',
+          received_by: staffID()[0].name,
+          delivery_receipt: 'C/o Warehouse',
+          total: calculateTotal(),
+          store_id: store._id,
+          store_name: store.name,
+        }
+        createStoreDeliverySummary(drs)
         filteredDetails.forEach(items => {
           if(items.status === "Pending"){
             let wproducts = {
@@ -93,51 +124,24 @@ const DeliveryRequestDetails = ({navigation, route}) => {
               withVariants: false,
               withOptions: false
             }
-
-         onSendProducts(wproducts, items);
-         setError('')
-          }
-  
-        });
-        saveToDeliveryReports()
-        setPinVisible(false)
-      }else{
-        setError("Wrong password, please try again!")
-      }
-      
-    }
-    
-
- 
-
-    const saveToDeliveryReports = () => {
-        let dates = moment().unix()
-         // let year = moment(date, "MMMM DD, YYYY").format('YYYY');
-         // let month = moment(date, "MMMM DD, YYYY").format('MMMM');
-         // let week = moment(date, "MMMM DD, YYYY").format('WW');
-     
-         
-         let drs = {
-           partition: `project=${user.id}`,
-           id: uuid.v4(),
-           timeStamp: moment().unix(),
-           year :moment.unix(dates).format('YYYY'),
-           year_month :moment.unix(dates).format('MMMM-YYYY'),
-           year_week :moment.unix(dates).format('WW-YYYY'),
-           date: moment.unix(dates).format('MMMM DD, YYYY'),
-           supplier: 'Warehouse',
-           supplier_id: 'Warehouse',
-           delivered_by: 'C/o Warehouse',
-           received_by: 'C/o Warehouse',
-           delivery_receipt: 'C/o Warehouse',
-           total: calculateTotal(),
-           store_id: store._id,
-           store_name: store.name,
-         }
-         createStoreDeliverySummary(drs)
-       
-         filteredDetails.forEach(items => {
-          if(items.status === "Pending"){
+            let trproducts = {
+              partition: `project=${user.id}`,
+              id:uuid.v4(),
+              timeStamp: moment().unix(),
+              year :moment.unix(dates).format('YYYY'),
+              year_month :moment.unix(dates).format('MMMM-YYYY'),
+              year_week :moment.unix(dates).format('WW-YYYY'),
+              date: moment.unix(dates).format('MMMM DD, YYYY'),
+              product: items.pr_name,
+              quantity: items.stock,
+              oprice: items.pr_oprice,
+              sprice: items.pr_sprice,
+              store_id: store._id,
+              store_name: store.name,
+              transferred_by :staffID()[0].name,
+              unit: items.unit,
+              category: items.pr_category
+            }
             let delivery = {
               partition: `project=${user.id}`,
               id: uuid.v4(),
@@ -159,47 +163,24 @@ const DeliveryRequestDetails = ({navigation, route}) => {
               store_name: store.name,
               tr_id: drs.id
             }
-          
-            let trproducts = {
-              partition: `project=${user.id}`,
-              id:uuid.v4(),
-              timeStamp: moment().unix(),
-              year :moment.unix(dates).format('YYYY'),
-              year_month :moment.unix(dates).format('MMMM-YYYY'),
-              year_week :moment.unix(dates).format('WW-YYYY'),
-              date: moment.unix(dates).format('MMMM DD, YYYY'),
-              product: items.pr_name,
-              quantity: items.stock,
-              oprice: items.pr_oprice,
-              sprice: items.pr_sprice,
-              store_id: store._id,
-              store_name: store.name,
-              transferred_by :'Admin',
-              unit: items.unit,
-              category: items.pr_category
-            }
+            console.log(drs.id)
             createDeliveryReport(delivery)
-            createtransferLogs(trproducts)
-          }
-            
-         });
-       
          
-             navigation.goBack()
-     
-     }
-     
-     
-      const calculateTotal = () => {
-        let total = 0;
-        filteredDetails.forEach(list => {
-          if(list.status === "Pending"){
-            total += list.stock * list.pr_sprice
+            onSendProducts(wproducts, items);
+            createtransferLogs(trproducts)
+            setPinVisible(false)
+            setError('')
+         navigation.goBack()
           }
-               
+  
         });
-       return total;
+       
+      }else{
+        setError("Wrong password, please try again!")
+      }
+      
     }
+    
 
     const onReturnSingleItem = () => {
       if(reason1.length === 0){
@@ -238,7 +219,8 @@ const DeliveryRequestDetails = ({navigation, route}) => {
     const onReturnAllCodeMatch = () => {
       if(staffID()[0].password === code){
         ReturnDelivery(request, reason, staffID()[0])
-        setOverlayVisible(false)
+        setVisible(false)
+        setReturnAllPinVisible(false)
         setCode('')
         setError('')
         navigation.goBack()
@@ -535,7 +517,7 @@ const DeliveryRequestDetails = ({navigation, route}) => {
                  }
                    <View style={{flexDirection:'row', justifyContent:'space-evenly', marginVertical: 15}}>
             <View  style={{flex: 1, marginHorizontal: 15}} >
-                <Button buttonStyle={{backgroundColor: colors.red}} title="Cancel" onPress={()=> setOverlayVisible(false)}/>
+                <Button buttonStyle={{backgroundColor: colors.red}} title="Cancel" onPress={()=> setVisible(false)}/>
             </View>
             <View  style={{flex: 1, marginHorizontal: 15}} >
              <Button buttonStyle={{backgroundColor: colors.green}}  title="Save" onPress={()=>  reason.length !== 0 ?  setReturnAllPinVisible(true) : setErrorText('Please fill in return reason.')}/>

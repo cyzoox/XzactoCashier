@@ -733,7 +733,8 @@ class DeliveryReport {
     received_by,
     delivery_receipt,
     store_id,
-    store_name
+    store_name,
+    tr_id
 
   }) {
     this._id = id,
@@ -754,6 +755,7 @@ class DeliveryReport {
     this.delivery_receipt = delivery_receipt,
     this.store_id = store_id,
     this.store_name = store_name
+    this.tr_id = tr_id
   }
 
   static schema = {
@@ -776,7 +778,8 @@ class DeliveryReport {
       received_by: "string",
       delivery_receipt: "string",
       store_name: "string",
-      store_id: "string"
+      store_id: "string",
+      tr_id:"string?"
     },
     primaryKey: "_id",
   };
@@ -1326,6 +1329,7 @@ class Expired {
   };
 }
 
+
 class TransferLogs {
   /**
    *
@@ -1395,6 +1399,7 @@ class TransferLogs {
     primaryKey: "_id",
   };
 }
+
 class Payment_Logs {
   /**
    *
