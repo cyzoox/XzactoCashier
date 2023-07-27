@@ -276,7 +276,7 @@ const onCancelCustomDisc = () => {
                   <Ionicons name={'search-outline'} size={33} color={colors.white}/>
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={{flexDirection:'row'}} onPress={()=> navigation.navigate('Archive')}>
-                 { archiveInfo.length != 0 ? 0
+                 { archiveInfo.length != 0 ? 
                  <Avatar
                        size={20}
                       rounded
