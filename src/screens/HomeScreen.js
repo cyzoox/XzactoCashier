@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Text, StyleSheet, View, TouchableOpacity,BackHandler, Alert as Alerts } from "react-native";
 import Modal from 'react-native-modal';
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AppHeader from "../components/AppHeader";
 import List from "../components/List";
@@ -28,6 +29,7 @@ const HomeScreen = ({ navigation, route }) => {
   const {stores, products, createArchive, archiveInfo, deleteList, updateProductOnClear, editListQty,createList , loading, products_list } = useStore();
   const {user} = useAuth();
   const [search, toggleSearch] = useState(false);
+  const [scan, toggleBcode] = useState(false);
   const [term, setTerm] = useState('');
   const [visible, setVisible] = useState(false)
   const [clear, setClear] = useState(false)
@@ -267,8 +269,11 @@ const onCancelCustomDisc = () => {
             } 
             rightComponent={
               <View style={{flexDirection:'row'}}>
-                <TouchableOpacity onPress={()=> toggleSearch(!search)}>
-                  <EvilIcons name={'search'} size={35} color={colors.white}/>
+                  <TouchableOpacity onPress={()=>{ toggleBcode(!scan), setModalVisible(true)}}>
+                  <Ionicons name={'barcode-outline'} size={33} color={colors.white}/>
+                </TouchableOpacity>
+                <TouchableOpacity style={{marginLeft: 15}} onPress={()=> toggleSearch(!search)}>
+                  <Ionicons name={'search-outline'} size={33} color={colors.white}/>
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={{flexDirection:'row'}} onPress={()=> navigation.navigate('Archive')}>
                  { archiveInfo.length != 0 ? 
@@ -318,7 +323,7 @@ const onCancelCustomDisc = () => {
 
       }
         
-        <Products search={search} toggleSearch={toggleSearch} store_info={selectStoreStaff()[0]}/>
+        <Products search={search} toggleSearch={toggleSearch} store_info={selectStoreStaff()[0]} scan={scan} toggleBarcode={toggleBcode} />
         <View style={styles.bottomView}>
           <TouchableOpacity onPress={()=> setModalVisible(true)} style={styles.checkoutBtn}>
            <Text style={{fontSize: 18, fontWeight: '700', color: colors.white}}> Subtotal  {formatMoney(calculateTotal(), { symbol: "₱", precision: 2 })}</Text>

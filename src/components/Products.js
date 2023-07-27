@@ -21,7 +21,7 @@ import BigList from "react-native-big-list";
 
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-export default function Products({ navigation, search,toggleSearch, store_info}) {
+export default function Products({ navigation, search,toggleSearch, store_info, scan, toggleBarcode}) {
   const { user } = useAuth();
 
   const { 
@@ -49,6 +49,7 @@ export default function Products({ navigation, search,toggleSearch, store_info})
     const [selectedOption, setSelectedOption] = useState([]);
     const [total, setTotal] = useState(0)
    const [aqty, setAqty] = useState(1)
+   const [bcode, setBarcode] = useState('');
    
     const setVariables = (itemss) => {
       setItems(itemss);
@@ -281,6 +282,35 @@ const onselectOption =(item) => {
           <Feather  name={'x-circle'} size={20} color={colors.black}/>
           </TouchableOpacity>
         </SearchBar>
+        }
+        {
+          scan &&
+          <View style={styles.textInputContainer}>
+          <TextInput
+            value={bcode}
+            onChangeText={(text) => {
+              setBarcode(text);
+            }}
+            onFocus={() => {
+              toggleBarcode(true); // Show the clear button on focus
+            }}
+            autoFocus
+            onBlur={() => {
+              // Hide the clear button after a delay (500ms in this example)
+              setTimeout(() => {
+                toggleBarcode(false)
+                setBarcode('')
+                toggleBarcode(true)
+              }, 500);
+            }}
+            style={styles.textInput}
+          />
+          {bcode !== '' && (
+            <TouchableOpacity style={styles.iconStyle} onPress={() => setBarcode('')}>
+              <Feather name={'x-circle'} size={20} color={colors.black} />
+            </TouchableOpacity>
+          )}
+        </View>
         }
     <Categories  onTabChange={onTabChange} store_info={store_info}/>
     <BigList
@@ -622,6 +652,23 @@ label: {
   justifyContent: 'center',
   alignItems: 'center',
   
+},
+textInputContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  borderWidth: 1,
+  borderColor: 'gray',
+  borderRadius: 8,
+  padding: 8,
+},
+textInput: {
+  flex: 1,
+  fontSize: 16,
+  paddingVertical: 4,
+  paddingHorizontal: 8,
+},
+iconStyle: {
+  padding: 4,
 },
 discountButton: {paddingVertical: 4,paddingHorizontal: 10, borderWidth: 1, borderColor: colors.accent, borderRadius: 10},
 discountButton2: {paddingVertical: 4,paddingHorizontal: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: 10, backgroundColor: colors.primary}
