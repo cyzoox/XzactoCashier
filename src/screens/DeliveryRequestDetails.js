@@ -163,18 +163,16 @@ const DeliveryRequestDetails = ({navigation, route}) => {
               store_name: store.name,
               tr_id: drs.id
             }
-            console.log(drs.id)
             createDeliveryReport(delivery)
-         
             onSendProducts(wproducts, items);
             createtransferLogs(trproducts)
-            setPinVisible(false)
-            setError('')
-         navigation.goBack()
+         
           }
   
         });
-       
+        setPinVisible(false)
+        setError('')
+       navigation.goBack()
       }else{
         setError("Wrong password, please try again!")
       }
