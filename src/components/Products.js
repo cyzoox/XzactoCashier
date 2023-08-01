@@ -112,6 +112,8 @@ export default function Products({ navigation, search,toggleSearch, store_info, 
     const filteredProducts = products.filter(createFilter(store_info._id, KEYS_TO_FILTERSs))
     const filteredProductss = filteredProducts.filter(createFilter(term, KEYS_TO_FILTERS))
 
+ 
+
     const onTabChange = (sterm) => {
       setTerm(sterm)
     }
@@ -301,7 +303,7 @@ const onselectOption =(item) => {
                 toggleBarcode(false)
                 setBarcode('')
                 toggleBarcode(true)
-              }, 500);
+              }, 300);
             }}
             style={styles.textInput}
           />

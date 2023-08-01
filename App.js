@@ -35,6 +35,7 @@ import SignupScreen from "./src/screens/SignupScreen";
 import CustomersAndCreditScreen from "./src/screens/CustomersAndCreditScreen";
 import DeliveryRequest from "./src/screens/DeliveryRequest";
 import DeliveryRequestDetails from "./src/screens/DeliveryRequestDetails";
+import BarcodePage from "./src/screens/BarcodePage";
 
 
 const Stack = createStackNavigator();
@@ -83,7 +84,7 @@ function DrawerScreen({store_info}) {
     <Drawer.Screen initialParams={{store_info: store_info}}  name="Return" component={ReturnScreen} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="DeliveryRequest" component={DeliveryRequest} />
     <Drawer.Screen initialParams={{store_info: store_info}}  name="DeliveryRequestDetails" component={DeliveryRequestDetails} />  
-
+    <Drawer.Screen initialParams={{store_info: store_info}}  name="BarcodePage" component={BarcodePage} />  
   </Drawer.Navigator>
   );
 }
