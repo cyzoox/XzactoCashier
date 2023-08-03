@@ -270,7 +270,7 @@ const onCancelCustomDisc = () => {
             } 
             rightComponent={
               <View style={{flexDirection:'row'}}>
-                  <TouchableOpacity onPress={()=> navigation.navigate('BarcodePage')}> 
+                  <TouchableOpacity onPress={()=> navigation.navigate('BarcodePage',{store_info: store_info})}> 
                   <Ionicons name={'barcode-outline'} size={33} color={colors.white}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={{marginLeft: 15}} onPress={()=> toggleSearch(!search)}>
