@@ -49,6 +49,7 @@ const HomeScreen = ({ navigation, route }) => {
   const onCancel = () => {
     setVisible(!visible)
   }
+  console.log('store info:', stores)
 
   const selectStoreStaff = () => {
     let store = []
@@ -269,7 +270,7 @@ const onCancelCustomDisc = () => {
             } 
             rightComponent={
               <View style={{flexDirection:'row'}}>
-                  <TouchableOpacity onPress={()=>{ toggleBcode(!scan), setModalVisible(true)}}>
+                  <TouchableOpacity onPress={()=> navigation.navigate('BarcodePage',{store_info: store_info})}> 
                   <Ionicons name={'barcode-outline'} size={33} color={colors.white}/>
                 </TouchableOpacity>
                 <TouchableOpacity style={{marginLeft: 15}} onPress={()=> toggleSearch(!search)}>
@@ -323,7 +324,7 @@ const onCancelCustomDisc = () => {
 
       }
         
-        <Products search={search} toggleSearch={toggleSearch} store_info={selectStoreStaff()[0]} scan={scan} toggleBarcode={toggleBcode} />
+        <Products search={search} toggleSearch={toggleSearch} store_info={store_info} scan={scan} toggleBarcode={toggleBcode} />
         <View style={styles.bottomView}>
           <TouchableOpacity onPress={()=> setModalVisible(true)} style={styles.checkoutBtn}>
            <Text style={{fontSize: 18, fontWeight: '700', color: colors.white}}> Subtotal  {formatMoney(calculateTotal(), { symbol: "₱", precision: 2 })}</Text>
