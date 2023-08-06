@@ -37,6 +37,7 @@ import DeliveryRequest from "./src/screens/DeliveryRequest";
 import DeliveryRequestDetails from "./src/screens/DeliveryRequestDetails";
 import BarcodePage from "./src/screens/BarcodePage";
 import BarcodeCheckoutScreen from "./src/screens/BarcodeCheckoutPage";
+import PrintingSettings from "./src/screens/PrinterSettings";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -55,6 +56,7 @@ function DrawerScreen2() {
       <Drawer.Screen name="Attendance" component={AttendanceScreen} />
       <Drawer.Screen name="Credits" component={Credits} />
       <Drawer.Screen name="Return" component={ReturnScreen} />
+      <Drawer.Screen name="PrinterSettings" component={PrintingSettings} />
     </Drawer.Navigator>
   );
 }
@@ -172,6 +174,11 @@ function Settings() {
       <Stack.Screen
         name="Printer"
         component={PrinterScreen}
+        options={{ headerShown: false }}
+      />
+         <Stack.Screen
+        name="PrinterSettings"
+        component={PrintingSettings}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

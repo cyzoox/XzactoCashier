@@ -21,8 +21,16 @@ const SettingsScreen = ({navigation}) => {
         <ListItem bottomDivider containerStyle={styles.list} onPress={() => navigation.navigate('Printer')}>
             <Avatar source={require('../../assets/bluetooth.png')} />
             <ListItem.Content>
-            <ListItem.Title>Printer</ListItem.Title>
+            <ListItem.Title>Connect to printer</ListItem.Title>
             <ListItem.Subtitle>Setup printer</ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Chevron />
+        </ListItem>
+        <ListItem bottomDivider containerStyle={styles.list} onPress={() => navigation.navigate('PrinterSettings')}>
+            <Avatar source={require('../../assets/printer.png')} />
+            <ListItem.Content>
+            <ListItem.Title>Printer Settings</ListItem.Title>
+            <ListItem.Subtitle>Header text, font size</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Chevron />
         </ListItem>

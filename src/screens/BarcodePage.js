@@ -124,7 +124,7 @@ export default function BarcodePage({ navigation, route }) {
       <AppHeader
         centerText="BARCODE MODE"
         leftComponent={
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => { toggleBcode(false),navigation.goBack()}}>
             <EvilIcons name={"arrow-left"} size={30} color={colors.white} />
           </TouchableOpacity>
         }

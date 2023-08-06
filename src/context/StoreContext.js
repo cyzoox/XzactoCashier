@@ -36,6 +36,7 @@ import { useAuth } from "./AuthContext";
 import uuid from "react-native-uuid";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import firestore from "@react-native-firebase/firestore";
 import { useCallback } from "react";
 const StoreContext = React.createContext(null);
@@ -70,8 +71,13 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
   const [stores, setStores] = useState([]);
   const [delivery_request, setDeliveryRequests] = useState([]);
   const [delivery_req_details, setDeliveryRequestDetails] = useState([]);
+  const [fontType, setFontType] = useState('A'); // Default font type
+  const [fontSize, setFontSize] = useState(1); 
 
   useEffect(() => {
+
+    loadPrinterSettings();
+
     const OpenRealmBehaviorConfiguration = {
       type: "openImmediately",
     };
@@ -303,6 +309,29 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
       };
     }
   }, [user]);
+
+  const loadPrinterSettings = async () => {
+    try {
+      const settings = await AsyncStorage.getItem('printer_settings');
+      if (settings) {
+        const parsedSettings = JSON.parse(settings);
+        setFontType(parsedSettings.fontType);
+        setFontSize(parsedSettings.fontSize);
+      }
+    } catch (error) {
+      console.error('Error loading printer settings:', error);
+    }
+  };
+
+  const updateFontSettings = async (newFontType, newFontSize) => {
+    try {
+      await AsyncStorage.setItem('printer_settings', JSON.stringify({ fontType: newFontType, fontSize: newFontSize }));
+      setFontType(newFontType);
+      setFontSize(newFontSize);
+    } catch (error) {
+      console.error('Error updating printer settings:', error);
+    }
+  };
 
   const getTRDetails = (tr_id) => {
     const projectPOS = realmRef.current;
@@ -1200,6 +1229,9 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
         createDeliveryReport,
         createStoreDeliverySummary,
         createtransferLogs,
+        fontType,
+        fontSize,
+        updateFontSettings,
       }}
     >
       {children}
