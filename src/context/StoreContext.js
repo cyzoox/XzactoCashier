@@ -71,11 +71,10 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
   const [stores, setStores] = useState([]);
   const [delivery_request, setDeliveryRequests] = useState([]);
   const [delivery_req_details, setDeliveryRequestDetails] = useState([]);
-  const [fontType, setFontType] = useState('A'); // Default font type
-  const [fontSize, setFontSize] = useState(1); 
+  const [fontBodySize, setFontBodySize] = useState(1); // Default font type
+  const [fontHeaderSize, setFontHeaderSize] = useState(2);
 
   useEffect(() => {
-
     loadPrinterSettings();
 
     const OpenRealmBehaviorConfiguration = {
@@ -312,24 +311,30 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
 
   const loadPrinterSettings = async () => {
     try {
-      const settings = await AsyncStorage.getItem('printer_settings');
+      const settings = await AsyncStorage.getItem("printer_settings");
       if (settings) {
         const parsedSettings = JSON.parse(settings);
-        setFontType(parsedSettings.fontType);
-        setFontSize(parsedSettings.fontSize);
+        setFontBodySize(parseInt(parsedSettings.fontBodySize));
+        setFontHeaderSize(parseInt(parsedSettings.fontHeaderSize));
       }
     } catch (error) {
-      console.error('Error loading printer settings:', error);
+      console.error("Error loading printer settings:", error);
     }
   };
 
-  const updateFontSettings = async (newFontType, newFontSize) => {
+  const updateFontSettings = async (newFontBodySize, newFontHeaderSize) => {
     try {
-      await AsyncStorage.setItem('printer_settings', JSON.stringify({ fontType: newFontType, fontSize: newFontSize }));
-      setFontType(newFontType);
-      setFontSize(newFontSize);
+      await AsyncStorage.setItem(
+        "printer_settings",
+        JSON.stringify({
+          fontHeaderSize: newFontHeaderSize,
+          fontBodySize: newFontBodySize,
+        })
+      );
+      setFontHeaderSize(newFontHeaderSize);
+      setFontBodySize(newFontBodySize);
     } catch (error) {
-      console.error('Error updating printer settings:', error);
+      console.error("Error updating printer settings:", error);
     }
   };
 
@@ -1229,8 +1234,8 @@ const StoreProvider = ({ children, projectPartition, store_info }) => {
         createDeliveryReport,
         createStoreDeliverySummary,
         createtransferLogs,
-        fontType,
-        fontSize,
+        fontHeaderSize,
+        fontBodySize,
         updateFontSettings,
       }}
     >
