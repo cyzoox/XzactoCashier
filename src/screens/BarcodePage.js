@@ -11,8 +11,10 @@ import {
   ScrollView,
   TextInput,
   Button,
+  Keyboard,
 } from "react-native";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import SearchInput, { createFilter } from "react-native-search-filter";
 import moment from "moment";
 import {} from "react-native-paper";
@@ -23,26 +25,25 @@ import { useAuth } from "../context/AuthContext";
 import formatMoney from "accounting-js/lib/formatMoney.js";
 import AppHeader from "../components/AppHeader";
 const KEYS_TO_FILTERSs = ["sku"];
+const KEYS_TO_INPUT_FILTERS = ["name"];
 
 export default function BarcodePage({ navigation, route }) {
   const { store_info } = route.params;
   const { user } = useAuth();
-  const {
-    stores,
-    products,
-    createList,
-    onSaveList,
-    products_list,
-    inventory,
-    option,
-    addon,
-  } = useStore();
+  const { products, onSaveList, products_list } = useStore();
 
   const [scan, toggleBcode] = useState(true);
   const [barcode, setBarcode] = useState("");
   const [scanned, setScanned] = useState([]);
   const [no_product, setNoProduct] = useState(false);
   const [total, setTotal] = useState(0);
+  const [kboardToggled, setKeyboardToggled] = useState(true);
+  const [inputtedBarcode, setInputtedBarcode] = useState("");
+
+  const filteredInputtedProduct = products.filter(
+    createFilter(inputtedBarcode, KEYS_TO_INPUT_FILTERS)
+  );
+
   useEffect(() => {
     // Calculate the total based on the scanned products
     const newTotal = scanned.reduce(
@@ -52,6 +53,39 @@ export default function BarcodePage({ navigation, route }) {
 
     setTotal(newTotal);
   }, [scanned]);
+
+  const toggleKeyboard = () => {
+    if (kboardToggled) {
+      setKeyboardToggled(false);
+    } else {
+      setKeyboardToggled(true);
+    }
+  };
+
+  const handleOnClickInputtedProduct = (iproduct) => {
+    const inputtedProduct = {
+      _partition: `project=${user.id}`,
+      _id: iproduct._id,
+      name: iproduct.name,
+      brand: iproduct.brand,
+      oprice: iproduct.oprice,
+      sprice: iproduct.sprice,
+      unit: iproduct.unit,
+      category: iproduct.category,
+      store_id: store_info._id,
+      store: iproduct.store,
+      quantity: 1,
+      uid: iproduct.pr_id,
+      timeStamp: moment().unix(),
+      addon: "",
+      sku: iproduct.sku,
+      addon_price: 0,
+      addon_cost: 0,
+      option: "",
+      withAddtional: false,
+    };
+    onSaveList(inputtedProduct, user, store_info);
+  };
 
   const handleScannedBarcode = (code) => {
     const filteredProducts = products.filter(
@@ -124,19 +158,78 @@ export default function BarcodePage({ navigation, route }) {
       <AppHeader
         centerText="BARCODE MODE"
         leftComponent={
-          <TouchableOpacity onPress={() => { toggleBcode(false),navigation.goBack()}}>
+          <TouchableOpacity
+            onPress={() => {
+              toggleBcode(false), navigation.goBack();
+            }}
+          >
             <EvilIcons name={"arrow-left"} size={30} color={colors.white} />
           </TouchableOpacity>
         }
       />
 
-      <View style={{ marginHorizontal: 20 }}>
-        <AutoFocusClearTextInput
-          scan={scan}
-          toggleBarcode={toggleBcode}
-          setBCode={handleScannedBarcode}
-        />
+      <View style={{ marginHorizontal: 20, flexDirection: "row" }}>
+        {kboardToggled ? (
+          <AutoFocusClearTextInput
+            scan={scan}
+            toggleBarcode={toggleBcode}
+            setBCode={handleScannedBarcode}
+          />
+        ) : (
+          <View style={styles.textInputContainer}>
+            <TextInput
+              value={inputtedBarcode}
+              onChangeText={(t) => setInputtedBarcode(t)}
+              style={styles.textInput}
+            />
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={{ justifyContent: "center", paddingHorizontal: 10 }}
+          onPress={toggleKeyboard}
+        >
+          <FontAwesome name={"keyboard-o"} size={35} color={colors.black} />
+        </TouchableOpacity>
       </View>
+      {kboardToggled == false && (
+        <ScrollView style={{ height: 30 }}>
+          <View
+            style={{
+              flexDirection: "column",
+              justifyContent: "space-around",
+            }}
+          >
+            {filteredInputtedProduct.map((element, index) => (
+              <TouchableOpacity
+                style={{
+                  marginTop: 5,
+                  marginHorizontal: 20,
+                  marginRight: 80,
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                  shadowColor: "#EBECF0",
+                  backgroundColor: colors.boldGrey,
+                  shadowOffset: {
+                    width: 0,
+                    height: 5,
+                  },
+                  shadowOpacity: 0.89,
+                  shadowRadius: 2,
+                  elevation: 5,
+                }}
+                onPress={() => handleOnClickInputtedProduct(element)}
+              >
+                <Text style={{ textAlign: "left", fontSize: 18 }} key={index}>
+                  {element.name} - {element.brand}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      )}
       <Text
         style={{
           textAlign: "center",
@@ -146,7 +239,7 @@ export default function BarcodePage({ navigation, route }) {
           color: colors.red,
         }}
       >
-        {no_product && "No product found."}
+        {no_product ?? "No product found."}
       </Text>
       <View
         style={{
@@ -240,3 +333,39 @@ export default function BarcodePage({ navigation, route }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  textInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 8,
+    padding: 8,
+    flex: 1,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  iconStyle: {
+    padding: 4,
+  },
+  discountButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: 10,
+  },
+  discountButton2: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    backgroundColor: colors.primary,
+  },
+});
