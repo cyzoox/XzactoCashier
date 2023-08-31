@@ -1,5 +1,12 @@
 import React, { useRef, useState } from "react";
-import { View, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { colors } from "../constants/theme";
 import Feather from "react-native-vector-icons/Feather";
 
@@ -11,29 +18,66 @@ const AutoFocusClearTextInput = ({ scan, toggleBarcode, setBCode }) => {
     setBCode(text);
   };
 
+  // useEffect(() => {
+  //   // Key Down Listener
+  //   const keyDownListener = KeyEvent.onKeyDownListener((keyEvent) => {
+  //     console.log(`onKeyDown keyCode: ${keyEvent.keyCode}`);
+  //     console.log(`Action: ${keyEvent.action}`);
+  //     console.log(`Key: ${keyEvent.pressedKey}`);
+  //   });
+
+  //   // Key Up Listener
+  //   const keyUpListener = KeyEvent.onKeyUpListener((keyEvent) => {
+  //     console.log(`onKeyUp keyCode: ${keyEvent.keyCode}`);
+  //     console.log(`Action: ${keyEvent.action}`);
+  //     console.log(`Key: ${keyEvent.pressedKey}`);
+  //   });
+
+  //   // Key Multiple Listener
+  //   const keyMultipleListener = KeyEvent.onKeyMultipleListener((keyEvent) => {
+  //     console.log(`onKeyMultiple keyCode: ${keyEvent.keyCode}`);
+  //     console.log(`Action: ${keyEvent.action}`);
+  //     console.log(`Characters: ${keyEvent.characters}`);
+  //   });
+
+  //   // Cleanup functions for listeners
+  //   return () => {
+  //     keyDownListener.remove();
+  //     keyUpListener.remove();
+  //     keyMultipleListener.remove();
+  //   };
+  // }, []);
+  const DismissKeyboard = ({ children }) => (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      {children}
+    </TouchableWithoutFeedback>
+  );
   return (
     <View style={{ flex: 1 }}>
       {scan && (
         <View style={styles.textInputContainer}>
-          <TextInput
-            value={bcode}
-            onEndEditing={(event) => {
-              handleScannedBarcode(event.nativeEvent.text);
-            }}
-            onFocus={() => {
-              toggleBarcode(true); // Show the clear button on focus
-            }}
-            autoFocus
-            onBlur={() => {
-              // Hide the clear button after a delay (500ms in this example)
-              setTimeout(() => {
-                toggleBarcode(false);
-                setBarcode("");
+          <DismissKeyboard>
+            <TextInput
+              value={bcode}
+              onEndEditing={(event) => {
+                handleScannedBarcode(event.nativeEvent.text);
+              }}
+              onFocus={() => {
                 toggleBarcode(true);
-              }, 300);
-            }}
-            style={styles.textInput}
-          />
+                // Show the clear button on focus
+              }}
+              showSoftInputOnFocus={false}
+              autoFocus
+              onBlur={() => {
+                // Hide the clear button after a delay (500ms in this example)
+                setTimeout(() => {
+                  setBarcode("");
+                  toggleBarcode(true);
+                }, 300);
+              }}
+              style={styles.textInput}
+            />
+          </DismissKeyboard>
           {bcode !== "" && (
             <TouchableOpacity
               style={styles.iconStyle}

@@ -18,6 +18,7 @@ import { useStore } from "../context/StoreContext";
 import AppHeader from "../components/AppHeader";
 import { colors } from "../constants/theme";
 import { TextInput } from "react-native-paper";
+import { CheckBox } from "react-native-elements";
 
 const PrintingSettings = ({ navigation }) => {
   const {
@@ -35,7 +36,10 @@ const PrintingSettings = ({ navigation }) => {
   );
   const [textToPrint, setTextToPrint] = useState("Hello, world!");
   const [header, setTextToPrintHeader] = useState("Hello, world!");
-
+  const [bussName, setBussinessName] = useState("");
+  const [address, setAddress] = useState("");
+  const [showInReceiptBName, setShowInReceiptBName] = useState(false);
+  const [showInReceiptBAdd, setShowInReceiptBAdd] = useState(false);
   const handlePrint = async () => {
     await BluetoothEscposPrinter.printerInit();
     await BluetoothEscposPrinter.printerLeftSpace(0);
@@ -74,7 +78,7 @@ const PrintingSettings = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.white }}>
       <AppHeader
         centerText="Printing Settings"
         leftComponent={
@@ -83,23 +87,49 @@ const PrintingSettings = ({ navigation }) => {
           </TouchableOpacity>
         }
       />
+      <CheckBox
+        right
+        title="Show in receipt"
+        containerStyle={{
+          backgroundColor: colors,
+          marginBottom: -10,
+          height: 20,
+          borderWidth: 0,
+        }}
+        checked={showInReceiptBName}
+        onPress={() => setShowInReceiptBName(!showInReceiptBName)}
+      />
+      <TextInput
+        label="Bussiness Name"
+        value={bussName}
+        multiline
+        numberOfLines={2}
+        style={{ padding: 10 }}
+        mode="outlined"
+        onChangeText={setBussinessName}
+      />
+      <CheckBox
+        right
+        title="Show in receipt"
+        containerStyle={{
+          backgroundColor: colors,
+          marginBottom: -10,
+          height: 20,
+          borderWidth: 0,
+        }}
+        checked={showInReceiptBAdd}
+        onPress={() => setShowInReceiptBAdd(!showInReceiptBAdd)}
+      />
+      <TextInput
+        label="Business Address"
+        value={address}
+        multiline
+        numberOfLines={3}
+        style={{ padding: 10 }}
+        mode="outlined"
+        onChangeText={setAddress}
+      />
       <ScrollView>
-        <TextInput
-          label="Enter text header"
-          value={header}
-          style={{ padding: 10 }}
-          mode="outlined"
-          onChangeText={setTextToPrintHeader}
-        />
-        <TextInput
-          label="Enter text body"
-          value={textToPrint}
-          multiline
-          numberOfLines={6}
-          style={{ padding: 10 }}
-          mode="outlined"
-          onChangeText={setTextToPrint}
-        />
         <View
           style={{ borderWidth: 1, margin: 10, borderRadius: 5, padding: 10 }}
         >
@@ -132,6 +162,22 @@ const PrintingSettings = ({ navigation }) => {
             <Picker.Item label="4" value="4" />
           </Picker>
         </View>
+        <TextInput
+          label="Enter sample text header"
+          value={header}
+          style={{ padding: 10 }}
+          mode="outlined"
+          onChangeText={setTextToPrintHeader}
+        />
+        <TextInput
+          label="Enter sample text body"
+          value={textToPrint}
+          multiline
+          numberOfLines={6}
+          style={{ padding: 10 }}
+          mode="outlined"
+          onChangeText={setTextToPrint}
+        />
         <TouchableOpacity
           style={{
             backgroundColor: colors.accent,

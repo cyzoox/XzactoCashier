@@ -24,15 +24,22 @@ import { useStore } from "../context/StoreContext";
 import { useAuth } from "../context/AuthContext";
 import formatMoney from "accounting-js/lib/formatMoney.js";
 import AppHeader from "../components/AppHeader";
+import { useIsFocused, useFocusEffect } from "@react-navigation/native";
 const KEYS_TO_FILTERSs = ["sku"];
 const KEYS_TO_INPUT_FILTERS = ["name"];
 
 export default function BarcodePage({ navigation, route }) {
   const { store_info } = route.params;
   const { user } = useAuth();
-  const { products, onSaveList, products_list } = useStore();
+  const {
+    products,
+    onSaveList,
+    products_list,
+    updateProductOnClear,
+    deleteItem,
+  } = useStore();
 
-  const [scan, toggleBcode] = useState(true);
+  const [scan, toggleBcode] = useState(false);
   const [barcode, setBarcode] = useState("");
   const [scanned, setScanned] = useState([]);
   const [no_product, setNoProduct] = useState(false);
@@ -44,15 +51,24 @@ export default function BarcodePage({ navigation, route }) {
     createFilter(inputtedBarcode, KEYS_TO_INPUT_FILTERS)
   );
 
-  useEffect(() => {
-    // Calculate the total based on the scanned products
-    const newTotal = scanned.reduce(
-      (accumulator, element) => accumulator + element.quantity * element.sprice,
-      0
-    );
+  useFocusEffect(
+    React.useCallback(() => {
+      // Do something when the screen is focused.
+      toggleBcode(true);
+      return () => {
+        // Do something when the screen is unfocused
+        toggleBcode(false);
+      };
+    }, [])
+  );
 
-    setTotal(newTotal);
-  }, [scanned]);
+  const calculateTotal = () => {
+    let total = 0;
+    products_list.forEach((item) => {
+      total += item.sprice * item.quantity;
+    });
+    return total;
+  };
 
   const toggleKeyboard = () => {
     if (kboardToggled) {
@@ -189,11 +205,15 @@ export default function BarcodePage({ navigation, route }) {
           style={{ justifyContent: "center", paddingHorizontal: 10 }}
           onPress={toggleKeyboard}
         >
-          <FontAwesome name={"keyboard-o"} size={35} color={colors.black} />
+          <FontAwesome
+            name={"keyboard-o"}
+            size={35}
+            color={!kboardToggled ? colors.red : colors.black}
+          />
         </TouchableOpacity>
       </View>
       {kboardToggled == false && (
-        <ScrollView style={{ height: 30 }}>
+        <ScrollView style={{ height: 150 }}>
           <View
             style={{
               flexDirection: "column",
@@ -222,7 +242,14 @@ export default function BarcodePage({ navigation, route }) {
                 }}
                 onPress={() => handleOnClickInputtedProduct(element)}
               >
-                <Text style={{ textAlign: "left", fontSize: 18 }} key={index}>
+                <Text
+                  style={{
+                    textAlign: "left",
+                    fontSize: 18,
+                    color: colors.white,
+                  }}
+                  key={index}
+                >
                   {element.name} - {element.brand}
                 </Text>
               </TouchableOpacity>
@@ -248,9 +275,40 @@ export default function BarcodePage({ navigation, route }) {
           paddingVertical: 20,
         }}
       >
-        <Text style={{ fontWeight: "bold", fontSize: 15 }}>Product</Text>
-        <Text style={{ fontWeight: "bold", fontSize: 15 }}>Quantity</Text>
-        <Text style={{ fontWeight: "bold", fontSize: 15 }}>Total</Text>
+        <Text
+          style={{
+            fontWeight: "bold",
+            fontSize: 15,
+            flex: 1,
+            textAlign: "center",
+          }}
+        >
+          Product
+        </Text>
+        <Text
+          style={{
+            fontWeight: "bold",
+            fontSize: 15,
+            flex: 1,
+            textAlign: "center",
+          }}
+        >
+          Quantity
+        </Text>
+
+        <Text style={{ fontWeight: "bold", fontSize: 15, flex: 1 }}>Total</Text>
+        {!kboardToggled && (
+          <Text
+            style={{
+              fontWeight: "bold",
+              fontSize: 15,
+              flex: 1,
+              textAlign: "center",
+            }}
+          >
+            Action
+          </Text>
+        )}
       </View>
       <ScrollView>
         <View
@@ -267,16 +325,30 @@ export default function BarcodePage({ navigation, route }) {
                 paddingVertical: 10,
               }}
             >
-              <Text style={{ textAlign: "left" }} key={index}>
+              <Text style={{ textAlign: "center", flex: 1 }} key={index}>
                 {element.name}
               </Text>
-              <Text key={index}>x{element.quantity}</Text>
-              <Text key={index}>
+              <Text style={{ textAlign: "center", flex: 1 }} key={index}>
+                x{element.quantity}
+              </Text>
+              <Text style={{ textAlign: "left", flex: 1 }} key={index}>
                 {formatMoney(element.quantity * element.sprice, {
                   symbol: "₱",
                   precision: 2,
                 })}
               </Text>
+              {!kboardToggled && (
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+
+                    alignItems: "center",
+                  }}
+                  onPress={() => deleteItem(element)}
+                >
+                  <EvilIcons name={"trash"} size={30} color={colors.red} />
+                </TouchableOpacity>
+              )}
             </View>
           ))}
         </View>
@@ -293,7 +365,7 @@ export default function BarcodePage({ navigation, route }) {
       >
         <Text style={{ fontWeight: "bold", fontSize: 18 }}>Total</Text>
         <Text style={{ fontSize: 18 }}>
-          {formatMoney(total, { symbol: "₱", precision: 2 })}
+          {formatMoney(calculateTotal(), { symbol: "₱", precision: 2 })}
         </Text>
       </View>
 
@@ -304,7 +376,7 @@ export default function BarcodePage({ navigation, route }) {
           backgroundColor: "white",
         }}
       >
-        <View style={{ flex: 1, margin: 10 }}>
+        <View style={{ flex: 1, margin: 10, flexDirection: "row" }}>
           <TouchableOpacity
             style={
               products_list.length == 0
@@ -313,12 +385,14 @@ export default function BarcodePage({ navigation, route }) {
                     marginRight: 2,
                     borderRadius: 15,
                     paddingVertical: 10,
+                    flex: 1,
                   }
                 : {
                     backgroundColor: colors.accent,
                     marginRight: 2,
                     borderRadius: 15,
                     paddingVertical: 10,
+                    flex: 1,
                   }
             }
             onPress={() => {
@@ -327,6 +401,25 @@ export default function BarcodePage({ navigation, route }) {
             }}
           >
             <Text style={{ textAlign: "center" }}>P A Y</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: colors.accent,
+              width: 100,
+              borderRadius: 15,
+              justifyContent: "center",
+            }}
+            onPress={() => updateProductOnClear(products_list)}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: colors.white,
+                fontWeight: "bold",
+              }}
+            >
+              Clear All
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
